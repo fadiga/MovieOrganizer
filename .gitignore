@@ -10,3 +10,4 @@ __pycache__/
 # Configuration IDE
 .vscode/
 .idea/
+.env/
