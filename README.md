@@ -16,7 +16,7 @@ Aucune dépendance externe n'est requise pour ce script. Il utilise uniquement l
 
 1. Clonez le dépôt :
    ```bash
-   git clone https://github.com/votre-utilisateur/MovieOrganizer.git
+   git clone https://github.com/fadiga/MovieOrganizer.git
    cd MovieOrganizer
    
 ## Utilisation
