@@ -1,3 +1,24 @@
+Metadata-Version: 2.4
+Name: movieorganizer
+Version: 0.1.0
+Summary: Organise les fichiers de films et séries téléchargés dans des dossiers appropriés
+Author: Fadiga
+License: MIT
+Keywords: movies,organizer,media,series
+Classifier: Development Status :: 4 - Beta
+Classifier: Environment :: Console
+Classifier: Intended Audience :: End Users/Desktop
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+Provides-Extra: dev
+Requires-Dist: flake8>=7.1.0; extra == "dev"
+Requires-Dist: pytest>=8.3.0; extra == "dev"
+
 # MovieOrganizer
 
 MovieOrganizer est un script Python qui organise les fichiers de films et séries téléchargés. Il déplace les fichiers dans des dossiers appropriés et regroupe les films similaires dans des sous-dossiers.

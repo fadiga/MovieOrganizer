@@ -1,0 +1,12 @@
+README.md
+pyproject.toml
+movieorganizer/__init__.py
+movieorganizer/config.ini
+movieorganizer/organize.py
+movieorganizer.egg-info/PKG-INFO
+movieorganizer.egg-info/SOURCES.txt
+movieorganizer.egg-info/dependency_links.txt
+movieorganizer.egg-info/entry_points.txt
+movieorganizer.egg-info/requires.txt
+movieorganizer.egg-info/top_level.txt
+tests/test_media_organizer.py
