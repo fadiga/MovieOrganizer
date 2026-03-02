@@ -27,14 +27,13 @@ def test_get_target_folder(temp_dir):
     target_folder_for_series = get_target_folder(
         series_filename, dest_folder=temp_dir
     )
-    # Série : dossier portant le même nom (stem) que le fichier
-    assert target_folder_for_series == temp_dir / "Series" / "Series Name - S01E01"
+    # Séries : Series/Nom.Serie - S01/
+    assert target_folder_for_series == temp_dir / "Series" / "Series Name - S01"
 
     target_folder_for_movie = get_target_folder(
         non_series_filename, dest_folder=temp_dir
     )
-    # Film : dossier portant le même nom (stem) que le fichier
-    assert target_folder_for_movie == temp_dir / "Movies" / "Random Movie"
+    assert target_folder_for_movie == temp_dir / "Movies"
 
 
 def test_calculate_similarity():

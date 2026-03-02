@@ -73,19 +73,24 @@ def get_target_folder(
     series_regex: re.Pattern = None,
 ) -> Path:
     """
-    Détermine le dossier de destination : films → Movies/<stem>, séries → Series/<stem>.
-    Chaque fichier est placé dans un dossier portant le même nom (stem).
+    Détermine le dossier de destination :
+    - Films → Movies/ (ex. Movies/Inception.2020.mkv)
+    - Séries → Series/Nom.Serie - S01/ (ex. Series/Nom.Serie - S01/Nom.Serie - S01E01.mkv)
     """
     if dest_folder is None or series_regex is None:
         config = _load_config()
         ctx = _init_from_config(config)
         dest_folder = dest_folder or ctx["dest_folder"]
         series_regex = series_regex or ctx["series_regex"]
-    stem = Path(filename).stem
     match = series_regex.match(filename)
     if match:
-        return dest_folder / "Series" / stem
-    return dest_folder / "Movies" / stem
+        series_name = match.group("series").strip()
+        season = match.group("season")
+        if season:
+            folder_name = f"{series_name} - S{season}"
+            return dest_folder / "Series" / folder_name
+        return dest_folder / "Series" / series_name
+    return dest_folder / "Movies"
 
 
 def process_downloads(
@@ -139,9 +144,6 @@ def process_downloads(
                 moved_files += 1
                 logger.info(f"{file_path.name} -----> {target_path}")
 
-    _organize_into_named_folders(dest_dir / "Movies")
-    _organize_into_named_folders(dest_dir / "Series")
-
     # Suppression des dossiers vides
     for dir_path in sorted(source_dir.rglob("*"), key=lambda p: -len(p.parts)):
         if dir_path.is_dir() and not list(dir_path.iterdir()):
@@ -157,28 +159,6 @@ def calculate_similarity(a: str, b: str) -> float:
     Calcule la similarité entre deux chaînes de caractères en utilisant la méthode SequenceMatcher.
     """
     return SequenceMatcher(None, a, b).ratio()
-
-
-def _organize_into_named_folders(root_folder: Path):
-    """
-    Organise films et séries : chaque fichier à la racine est placé dans un dossier
-    portant le même nom (stem). Si le dossier existe déjà, le fichier y est
-    classé ; sinon le dossier est créé.
-    """
-    if not root_folder.exists():
-        return
-    label = "FILMS" if root_folder.name == "Movies" else "SÉRIES"
-    logger.info("---------ORGANISATION DES %s-------------------\n", label)
-    for path in list(root_folder.iterdir()):
-        if not path.is_file():
-            continue
-        stem = path.stem
-        target_folder = root_folder / stem
-        target_folder.mkdir(exist_ok=True)
-        new_path = target_folder / path.name
-        if path.resolve() != new_path.resolve():
-            path.rename(new_path)
-            logger.info(f"Déplacé {path.name} vers {new_path}")
 
 
 def run():
