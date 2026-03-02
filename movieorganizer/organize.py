@@ -73,21 +73,19 @@ def get_target_folder(
     series_regex: re.Pattern = None,
 ) -> Path:
     """
-    Détermine le dossier de destination en fonction du nom de fichier.
-    Les séries sont organisées par nom de série et saison.
+    Détermine le dossier de destination : films → Movies/<stem>, séries → Series/<stem>.
+    Chaque fichier est placé dans un dossier portant le même nom (stem).
     """
     if dest_folder is None or series_regex is None:
         config = _load_config()
         ctx = _init_from_config(config)
         dest_folder = dest_folder or ctx["dest_folder"]
         series_regex = series_regex or ctx["series_regex"]
+    stem = Path(filename).stem
     match = series_regex.match(filename)
     if match:
-        series_name = match.group("series").strip()
-        season = match.group("season")
-        if season:
-            return dest_folder / "Series" / series_name / f"Season {season}"
-    return dest_folder / "Movies"
+        return dest_folder / "Series" / stem
+    return dest_folder / "Movies" / stem
 
 
 def process_downloads(
@@ -141,7 +139,8 @@ def process_downloads(
                 moved_files += 1
                 logger.info(f"{file_path.name} -----> {target_path}")
 
-    _organize_movies(dest_dir / "Movies", similarity_threshold)
+    _organize_into_named_folders(dest_dir / "Movies")
+    _organize_into_named_folders(dest_dir / "Series")
 
     # Suppression des dossiers vides
     for dir_path in sorted(source_dir.rglob("*"), key=lambda p: -len(p.parts)):
@@ -160,31 +159,26 @@ def calculate_similarity(a: str, b: str) -> float:
     return SequenceMatcher(None, a, b).ratio()
 
 
-def _organize_movies(movies_folder: Path, similarity_threshold: float):
+def _organize_into_named_folders(root_folder: Path):
     """
-    Organise les fichiers de films dans des sous-dossiers basés sur la similarité des noms de fichiers.
+    Organise films et séries : chaque fichier à la racine est placé dans un dossier
+    portant le même nom (stem). Si le dossier existe déjà, le fichier y est
+    classé ; sinon le dossier est créé.
     """
-    logger.info("---------ORGANISATION DES FILMS-------------------\n")
-    files = list(movies_folder.glob("*"))
-
-    grouped_files = []
-    while files:
-        base_file = files.pop(0)
-        group = [base_file]
-        for file in files[:]:
-            if calculate_similarity(base_file.stem, file.stem) > similarity_threshold:
-                group.append(file)
-                files.remove(file)
-        grouped_files.append(group)
-
-    for group in grouped_files:
-        if len(group) > 1:
-            group_folder = movies_folder / group[0].stem
-            group_folder.mkdir(exist_ok=True)
-            for file in group:
-                new_path = group_folder / file.name
-                file.rename(new_path)
-                logger.info(f"Déplacé {file.name} vers {new_path}")
+    if not root_folder.exists():
+        return
+    label = "FILMS" if root_folder.name == "Movies" else "SÉRIES"
+    logger.info("---------ORGANISATION DES %s-------------------\n", label)
+    for path in list(root_folder.iterdir()):
+        if not path.is_file():
+            continue
+        stem = path.stem
+        target_folder = root_folder / stem
+        target_folder.mkdir(exist_ok=True)
+        new_path = target_folder / path.name
+        if path.resolve() != new_path.resolve():
+            path.rename(new_path)
+            logger.info(f"Déplacé {path.name} vers {new_path}")
 
 
 def run():
